@@ -3,8 +3,8 @@ from .models import UserProfile
 
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'gpa', 'balance')
-    search_fields = ('user__username', 'user__email')
+    list_display = ('user', 'gpa', 'balance', 'university')
+    search_fields = ('user__username', 'university__name')
     list_filter = ('gpa', 'balance')
 
 

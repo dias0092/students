@@ -4,9 +4,14 @@ from apps.authorization.models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    university_name = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfile
-        fields = ['gpa', 'avatar', 'balance']
+        fields = ['gpa', 'avatar', 'balance', 'university_name']
+
+    def get_university_name(self, obj):
+        return obj.university.name if obj.university else None
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,4 +19,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile']
+        fields = ['id', 'username', 'first_name', 'last_name', 'profile']

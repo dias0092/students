@@ -17,8 +17,8 @@ DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = ['192.168.0.102', 'localhost']
 
-ACCESS_TOKEN_LIFETIME = timedelta(days=365)
-REFRESH_TOKEN_LIFETIME = timedelta(days=365*2)
+ACCESS_TOKEN_LIFETIME = timedelta(days=5)
+REFRESH_TOKEN_LIFETIME = timedelta(days=10)
 # Application definition
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': ACCESS_TOKEN_LIFETIME,

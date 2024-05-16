@@ -2,6 +2,7 @@ from django.contrib import admin
 from apps.studyplan.models import Semester, University, Subject, StudyPlan, ClassSchedule, SubjectSemester, Faculty
 from apps.studyplan.form import SubjectSemesterForm
 
+
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ('year', 'term', 'credit_limit')
     search_fields = ('year', 'term')
