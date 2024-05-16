@@ -65,7 +65,13 @@ class ClassScheduleListCreateAPIView(APIView):
             return Response({'error': 'User profile ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         schedules = ClassSchedule.objects.filter(student_id=user_profile_id).values(
-            'id', 'day_of_week', 'start_time', 'end_time', 'subject_semester__subject__title', 'semester__year', 'semester__term'
+            'id',
+            'day_of_week',
+            'start_time',
+            'end_time',
+            'subject_semester__subject__title',
+            'subject_semester__subject__description',
+            'subject_semester__subject__university__name'
         )
         return Response(list(schedules), status=status.HTTP_200_OK)
 
@@ -101,27 +107,18 @@ class ClassScheduleListCreateAPIView(APIView):
                     semester = Semester.objects.get(id=semester_id)
                     subject_semester = SubjectSemester.objects.get(id=subject_semester_id)
 
-                    if student.university == subject_semester.subject.university:
-                        return Response({'error': 'Cannot add subject from the same university'},
+                    # Check for existing schedule with the same subject_semester_id
+                    if ClassSchedule.objects.filter(student=student, subject_semester=subject_semester).exists():
+                        return Response({'error': f'Schedule with subject {subject_semester.subject.title} for semester {subject_semester.semester.term} {subject_semester.semester.year} already exists'},
                                         status=status.HTTP_400_BAD_REQUEST)
 
-                    existing_classes = ClassSchedule.objects.filter(
-                        student=student,
-                        semester=semester,
-                        subject_semester__subject__university__ne=student.university
-                    )
-
-                    if existing_classes.exists():
-                        return Response(
-                            {'error': 'You can only add one subject from a different university per semester'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+                    # Check for time conflicts
                     time_conflicts = ClassSchedule.objects.filter(
                         student=student,
                         semester=semester,
                         day_of_week=day_of_week,
-                        start_time__lt=end_time,
-                        end_time__gt=start_time
+                        start_time=end_time,
+                        end_time=start_time
                     )
 
                     if time_conflicts.exists():
@@ -154,7 +151,22 @@ class ClassScheduleListCreateAPIView(APIView):
                 return Response({'success': 'Classes added to schedule successfully', 'schedules': added_schedules},
                                 status=status.HTTP_201_CREATED)
 
-        except (Semester.DoesNotExist, SubjectSemester.DoesNotExist) as e:
+        except (UserProfile.DoesNotExist, Semester.DoesNotExist, SubjectSemester.DoesNotExist) as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def delete(self, request, pk=None):
+        user_profile_id = UserProfile.objects.get(user=request.user).id
+        schedule_id = pk or request.data.get('schedule_id')
+
+        if not schedule_id:
+            return Response({'error': 'Schedule ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            schedule = ClassSchedule.objects.get(id=schedule_id, student_id=user_profile_id)
+            schedule.delete()
+            return Response({'message': 'Class schedule deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except ClassSchedule.DoesNotExist:
+            return Response({'error': 'Class schedule not found'}, status=status.HTTP_404_NOT_FOUND)

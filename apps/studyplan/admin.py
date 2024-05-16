@@ -14,7 +14,7 @@ class UniversityAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('title', 'code', 'credits', 'university', 'get_offered_semesters', 'faculty')
+    list_display = ('title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'faculty')
     list_filter = ('university', 'offered_semesters', 'faculty')
     search_fields = ('title', 'code')
 
@@ -42,14 +42,19 @@ class ClassScheduleAdmin(admin.ModelAdmin):
 
 class SubjectSemesterAdmin(admin.ModelAdmin):
     form = SubjectSemesterForm
-    list_display = ('get_subject_with_university', 'semester', 'day_of_week', 'start_time', 'end_time')
-    list_filter = ('subject', 'semester', 'day_of_week')
+    list_display = ('get_subject_with_university', 'get_faculty_name', 'semester', 'day_of_week', 'start_time', 'end_time')
+    list_filter = ('subject', 'semester', 'day_of_week', 'subject__faculty')
     search_fields = ('subject__title', 'semester__term')
 
     def get_subject_with_university(self, obj):
         return f"{obj.subject.title} ({obj.subject.university.name})"
     get_subject_with_university.admin_order_field = 'subject'
     get_subject_with_university.short_description = 'Subject (University)'
+
+    def get_faculty_name(self, obj):
+        return obj.subject.faculty.name if obj.subject.faculty else 'N/A'
+    get_faculty_name.admin_order_field = 'subject__faculty'
+    get_faculty_name.short_description = 'Faculty Name'
 
 
 class FacultyAdmin(admin.ModelAdmin):
