@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -14,10 +15,15 @@ CORS_ALLOW_CREDENTIALS = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.0.102', 'localhost']
 
-
+ACCESS_TOKEN_LIFETIME = timedelta(days=365)
+REFRESH_TOKEN_LIFETIME = timedelta(days=365*2)
 # Application definition
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': ACCESS_TOKEN_LIFETIME,
+    'REFRESH_TOKEN_LIFETIME': REFRESH_TOKEN_LIFETIME
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
