@@ -15,7 +15,7 @@ CORS_ALLOW_CREDENTIALS = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = ['192.168.0.102', 'localhost']
+ALLOWED_HOSTS = []
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=5)
 REFRESH_TOKEN_LIFETIME = timedelta(days=10)
