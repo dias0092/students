@@ -71,7 +71,8 @@ class ClassScheduleListCreateAPIView(APIView):
             'end_time',
             'subject_semester__subject__title',
             'subject_semester__subject__description',
-            'subject_semester__subject__university__name'
+            'subject_semester__subject__university__name',
+            'subject_semester_id'
         )
         return Response(list(schedules), status=status.HTTP_200_OK)
 
@@ -109,7 +110,8 @@ class ClassScheduleListCreateAPIView(APIView):
 
                     # Check for existing schedule with the same subject_semester_id
                     if ClassSchedule.objects.filter(student=student, subject_semester=subject_semester).exists():
-                        return Response({'error': f'Schedule with subject {subject_semester.subject.title} for semester {subject_semester.semester.term} {subject_semester.semester.year} already exists'},
+                        return Response({
+                                            'error': f'Schedule with subject {subject_semester.subject.title} for semester {subject_semester.semester.term} {subject_semester.semester.year} already exists'},
                                         status=status.HTTP_400_BAD_REQUEST)
 
                     # Check for time conflicts
@@ -117,8 +119,8 @@ class ClassScheduleListCreateAPIView(APIView):
                         student=student,
                         semester=semester,
                         day_of_week=day_of_week,
-                        start_time=end_time,
-                        end_time=start_time
+                        start_time__lt=end_time,
+                        end_time__gt=start_time
                     )
 
                     if time_conflicts.exists():
@@ -159,13 +161,13 @@ class ClassScheduleListCreateAPIView(APIView):
 
     def delete(self, request, pk=None):
         user_profile_id = UserProfile.objects.get(user=request.user).id
-        schedule_id = pk or request.data.get('schedule_id')
+        subject_semester_id = pk
 
-        if not schedule_id:
+        if not subject_semester_id:
             return Response({'error': 'Schedule ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            schedule = ClassSchedule.objects.get(id=schedule_id, student_id=user_profile_id)
+            schedule = ClassSchedule.objects.get(subject_semester_id=subject_semester_id, student_id=user_profile_id)
             schedule.delete()
             return Response({'message': 'Class schedule deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except ClassSchedule.DoesNotExist:
