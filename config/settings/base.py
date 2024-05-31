@@ -78,10 +78,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "studyplan",
-        "USER": "studyplan",
-        "PASSWORD": "studyplan",
-        "HOST": "localhost",
+        "NAME": "dagjujq69c5iu7",
+        "USER": "u3dgin46f3na9b",
+        "PASSWORD": "pb34c53f257356acf156b83891ec64c7de2f35ba7d5324e774ac615b25e84a7c2",
+        "HOST": "cav8p52l9arddb.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com",
         "PORT": "5432",
     }
 }
