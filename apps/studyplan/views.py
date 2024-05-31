@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester
 from apps.authorization.models import UserProfile
-
+from fuzzywuzzy import fuzz
 
 class AvailableSubjectSemestersAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -172,3 +172,40 @@ class ClassScheduleListCreateAPIView(APIView):
             return Response({'message': 'Class schedule deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except ClassSchedule.DoesNotExist:
             return Response({'error': 'Class schedule not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class SimilarSubjectsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_profile = request.user.userprofile
+        user_university = user_profile.university
+
+        if not user_university:
+            return Response({'error': 'User is not associated with any university'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subjects = Subject.objects.filter(university=user_university)
+        other_university_subjects = Subject.objects.exclude(university=user_university)
+
+        similar_subjects = []
+
+        for user_subject in user_subjects:
+            for other_subject in other_university_subjects:
+                similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
+                if similarity >= 80:
+                    similar_subjects.append({
+                        'user_subject': {
+                            'title': user_subject.title,
+                            'description': user_subject.description,
+                            'university': user_subject.university.name
+                        },
+                        'similar_subject': {
+                            'title': other_subject.title,
+                            'description': other_subject.description,
+                            'university': other_subject.university.name,
+                            'similarity': similarity
+                        }
+                    })
+
+        return Response(similar_subjects, status=status.HTTP_200_OK)
