@@ -1,18 +1,57 @@
-asgiref==3.8.1 ; python_version >= "3.12" and python_version < "4.0"
-django-cors-headers==4.3.1 ; python_version >= "3.12" and python_version < "4.0"
-django==5.0.6 ; python_version >= "3.12" and python_version < "4.0"
-djangorestframework-simplejwt==5.3.1 ; python_version >= "3.12" and python_version < "4.0"
-djangorestframework==3.15.1 ; python_version >= "3.12" and python_version < "4.0"
-drf-yasg==1.21.7 ; python_version >= "3.12" and python_version < "4.0"
-fuzzywuzzy==0.18.0 ; python_version >= "3.12" and python_version < "4.0"
-inflection==0.5.1 ; python_version >= "3.12" and python_version < "4.0"
-packaging==24.0 ; python_version >= "3.12" and python_version < "4.0"
-pillow==10.3.0 ; python_version >= "3.12" and python_version < "4.0"
-psycopg2==2.9.9 ; python_version >= "3.12" and python_version < "4.0"
-pyjwt==2.8.0 ; python_version >= "3.12" and python_version < "4.0"
-pytz==2024.1 ; python_version >= "3.12" and python_version < "4.0"
-pyyaml==6.0.1 ; python_version >= "3.12" and python_version < "4.0"
-setuptools==69.5.1 ; python_version >= "3.12" and python_version < "4.0"
-sqlparse==0.5.0 ; python_version >= "3.12" and python_version < "4.0"
-tzdata==2024.1 ; python_version >= "3.12" and python_version < "4.0" and sys_platform == "win32"
-uritemplate==4.1.1 ; python_version >= "3.12" and python_version < "4.0"
+asgiref==3.8.1
+build==1.2.1
+CacheControl==0.14.0
+certifi==2024.2.2
+cffi==1.16.0
+charset-normalizer==3.3.2
+cleo==2.1.0
+crashtest==0.4.1
+distlib==0.3.8
+dj-database-url==2.2.0
+Django==5.0.6
+django-cors-headers==4.3.1
+django-heroku==0.3.1
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+drf-yasg==1.21.7
+dulwich==0.21.7
+fastjsonschema==2.19.1
+filelock==3.14.0
+fuzzywuzzy==0.18.0
+gunicorn==22.0.0
+idna==3.7
+inflection==0.5.1
+installer==0.7.0
+jaraco.classes==3.4.0
+keyring==24.3.1
+more-itertools==10.2.0
+msgpack==1.0.8
+packaging==24.0
+pexpect==4.9.0
+pillow==10.3.0
+pkginfo==1.10.0
+platformdirs==4.2.1
+poetry==1.8.3
+poetry-core==1.9.0
+poetry-plugin-export==1.8.0
+psycopg2==2.9.9
+ptyprocess==0.7.0
+pycparser==2.22
+PyJWT==2.8.0
+pyproject_hooks==1.1.0
+pytz==2024.1
+PyYAML==6.0.1
+rapidfuzz==3.9.0
+requests==2.31.0
+requests-toolbelt==1.0.0
+setuptools==69.5.1
+shellingham==1.5.4
+sqlparse==0.5.0
+tomlkit==0.12.5
+trove-classifiers==2024.4.10
+typing_extensions==4.12.0
+uritemplate==4.1.1
+urllib3==2.2.1
+virtualenv==20.26.2
+whitenoise==6.6.0
+xattr==1.1.0
