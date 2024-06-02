@@ -144,6 +144,17 @@ coreapi = ["coreapi (>=2.3.3)", "coreschema (>=0.0.4)"]
 validation = ["swagger-spec-validator (>=2.1.0)"]
 
 [[package]]
+name = "et-xmlfile"
+version = "1.1.0"
+description = "An implementation of lxml.xmlfile for the standard library"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "et_xmlfile-1.1.0-py3-none-any.whl", hash = "sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada"},
+    {file = "et_xmlfile-1.1.0.tar.gz", hash = "sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c"},
+]
+
+[[package]]
 name = "fuzzywuzzy"
 version = "0.18.0"
 description = "Fuzzy string matching in python"
@@ -188,6 +199,20 @@ files = [
     {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
     {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
 ]
+
+[[package]]
+name = "openpyxl"
+version = "3.1.3"
+description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "openpyxl-3.1.3-py2.py3-none-any.whl", hash = "sha256:25071b558db709de9e8782c3d3e058af3b23ffb2fc6f40c8f0c45a154eced2c3"},
+    {file = "openpyxl-3.1.3.tar.gz", hash = "sha256:8dd482e5350125b2388070bb2477927be2e8ebc27df61178709bc8c8751da2f9"},
+]
+
+[package.dependencies]
+et-xmlfile = "*"
 
 [[package]]
 name = "packaging"
@@ -476,4 +501,4 @@ brotli = ["Brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "a6a4f4ad78f1285102ac40bbacf2122c6931a9fd49aafbe97b520f597b884c98"
+content-hash = "cf3d1621311ac92b1b7b8d34b468532ece0d795a9620d7c105577ab0e844affe"

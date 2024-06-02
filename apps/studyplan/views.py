@@ -1,12 +1,15 @@
 from datetime import time
 from django.db import transaction
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester
+from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester, StudyPlan
 from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
+import openpyxl
+
 
 class AvailableSubjectSemestersAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -203,3 +206,54 @@ class SimilarSubjectsAPIView(APIView):
                     })
 
         return Response(similar_subjects, status=status.HTTP_200_OK)
+
+
+class ExportStudyPlanToExcelAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        student = get_object_or_404(UserProfile, user=request.user)
+
+        # Fetch the latest semester or a default semester for the student
+        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term').first()
+        if not study_plan:
+            return Response({'error': 'No study plan found for the student'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create a workbook and add a worksheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = 'Study Plan'
+
+        # Add headers
+        sheet['A1'] = 'Student name:'
+        sheet['B1'] = student.user.username
+        sheet['A2'] = 'University name:'
+        sheet['B2'] = study_plan.semester.university.name
+        sheet['A3'] = 'Semester:'
+        sheet['B3'] = f"{study_plan.semester.term} {study_plan.semester.year}"
+
+        # Add subject headers
+        sheet['A5'] = 'Subject Name'
+        sheet['B5'] = 'Credits'
+
+        # Add subjects and calculate total credits
+        row = 6
+        total_credits = 0
+        for subject in study_plan.subjects.all():
+            sheet[f'A{row}'] = subject.title
+            sheet[f'B{row}'] = subject.credits
+            total_credits += subject.credits
+            row += 1
+
+        # Add total credits
+        sheet[f'A{row}'] = 'Total Credits'
+        sheet[f'B{row}'] = total_credits
+
+        # Set the response to download the file
+        response = Response(content=workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename=study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx'
+
+        # Save the workbook to the response
+        workbook.save(response)
+
+        return response
