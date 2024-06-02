@@ -218,7 +218,7 @@ class ExportStudyPlanToExcelAPIView(APIView):
         student = get_object_or_404(UserProfile, user=request.user)
 
         # Fetch the latest semester or a default semester for the student
-        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term').first()
+        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term')
         if not study_plan:
             return Response({'error': 'No study plan found for the student'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -240,7 +240,6 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet['B5'] = 'Credits'
 
         # Add subjects and calculate total credits
-        print(study_plan.subjects.all())
         row = 6
         total_credits = 0
         for subject in study_plan.subjects.all():
