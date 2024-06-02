@@ -8,8 +8,8 @@ from rest_framework import status
 from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester, StudyPlan
 from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
-import openpyxl
-from django.http import HttpResponse
+import pandas as pd
+from django.http import FileResponse
 from io import BytesIO
 
 
@@ -235,46 +235,38 @@ class ExportStudyPlanToExcelAPIView(APIView):
         # Fetch the latest semester or a default semester for the student
         study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term').first()
         if not study_plan:
-            return Response({'error': 'No study plan found for the student'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'No study plan found for the student'}, status=404)
 
         subjects = study_plan.subjects.all()
-        # Create a workbook and add a worksheet
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-        sheet.title = 'Study Plan'
 
-        # Add headers
-        sheet['A1'] = 'Student name:'
-        sheet['B1'] = student.user.username
-        sheet['A2'] = 'University name:'
-        sheet['B2'] = student.university.name
-        sheet['A3'] = 'Semester:'
-        sheet['B3'] = f"{study_plan.semester.term} {study_plan.semester.year}"
+        # Create a DataFrame
+        data = {
+            'Subject Name': [subject.title for subject in subjects],
+            'Credits': [subject.credits for subject in subjects]
+        }
+        df = pd.DataFrame(data)
+        total_credits = df['Credits'].sum()
 
-        # Add subject headers
-        sheet['A5'] = 'Subject Name'
-        sheet['B5'] = 'Credits'
+        # Add total credits row
+        total_credits_row = pd.DataFrame([['Total Credits', total_credits]], columns=['Subject Name', 'Credits'])
+        df = pd.concat([df, total_credits_row], ignore_index=True)
 
-        # Add subjects and calculate total credits
-        row = 6
-        total_credits = 0
-        for subject in subjects:
-            sheet[f'A{row}'] = subject.title
-            sheet[f'B{row}'] = subject.credits
-            total_credits += subject.credits
-            row += 1
+        # Add headers for student info
+        student_info = pd.DataFrame([
+            ['Student name:', student.user.username],
+            ['University name:', student.university.name],
+            ['Semester:', f"{study_plan.semester.term} {study_plan.semester.year}"]
+        ], columns=['Subject Name', 'Credits'])
 
-        # Add total credits
-        sheet[f'A{row}'] = 'Total Credits'
-        sheet[f'B{row}'] = total_credits
+        df = pd.concat([student_info, pd.DataFrame([['', '']]), df], ignore_index=True)
 
-        # Save the workbook to a bytes buffer
+        # Save the DataFrame to a bytes buffer
         buffer = BytesIO()
-        workbook.save(buffer)
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Study Plan')
+
         buffer.seek(0)
 
         # Set the response to download the file
-        response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename=study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx'
-
+        response = FileResponse(buffer, as_attachment=True, filename=f'study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx')
         return response
