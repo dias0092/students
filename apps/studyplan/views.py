@@ -215,7 +215,7 @@ class SimilarSubjectsAPIView(APIView):
             print(f"User subjects: {[subject.title for subject in user_subjects]}")
 
             # Fetch study plans from other universities based on filters
-            other_study_plans = StudyPlan.objects.exclude(student__university=user_university).filter(**filters).distinct()
+            other_study_plans = StudyPlan.objects.filter(**filters).distinct()
 
             print(f"Other study plans count: {other_study_plans.count()}")
 
