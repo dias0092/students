@@ -187,7 +187,7 @@ class SimilarSubjectsAPIView(APIView):
             user_university = user_profile.university
 
             if not user_university:
-                logger.error("User is not associated with any university")
+                print("User is not associated with any university")
                 return Response({'error': 'User is not associated with any university'}, status=status.HTTP_400_BAD_REQUEST)
 
             university_name = request.data.get('university')
@@ -206,25 +206,25 @@ class SimilarSubjectsAPIView(APIView):
             if year:
                 filters['subjects__offered_semesters__year'] = year
 
-            logger.debug(f"Filters: {filters}")
+            print(f"Filters: {filters}")
 
             # Fetch subjects from the user's class schedules
             user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related('subject_semester__subject')
             user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
 
-            logger.debug(f"User subjects: {[subject.title for subject in user_subjects]}")
+            print(f"User subjects: {[subject.title for subject in user_subjects]}")
 
             # Fetch study plans from other universities based on filters
             other_study_plans = StudyPlan.objects.exclude(student__university=user_university).filter(**filters).distinct()
 
-            logger.debug(f"Other study plans count: {other_study_plans.count()}")
+            print(f"Other study plans count: {other_study_plans.count()}")
 
             # Extract unique subjects from the filtered study plans
             other_university_subjects = set()
             for plan in other_study_plans:
                 other_university_subjects.update(plan.subjects.all())
 
-            logger.debug(f"Other university subjects: {[subject.title for subject in other_university_subjects]}")
+            print(f"Other university subjects: {[subject.title for subject in other_university_subjects]}")
 
             similar_subjects = []
 
