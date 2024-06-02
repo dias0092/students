@@ -124,15 +124,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-AVATAR_URL = '/avatars/'
-AVATAR_ROOT = os.path.join(BASE_DIR, 'avatars')
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (Uploaded files)
-MEDIA_URL = AVATAR_URL
-MEDIA_ROOT = AVATAR_ROOT
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
