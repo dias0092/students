@@ -188,17 +188,17 @@ class SimilarSubjectsAPIView(APIView):
 
             if not user_university:
                 logger.error("User is not associated with any university")
-                return Response({'error': 'User is not associated with any university'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'User is not associated with any university'}, status=status.HTTP_400_BAD_REQUEST)
 
             university_name = request.data.get('university')
             faculty_name = request.data.get('faculty')
             term = request.data.get('term')
             year = request.data.get('year')
 
+            # Prepare filters for the study plans
             filters = {}
             if university_name:
-                filters['subjects__university__name'] = university_name
+                filters['student__university__name'] = university_name
             if faculty_name:
                 filters['subjects__faculty__name'] = faculty_name
             if term:
@@ -209,15 +209,13 @@ class SimilarSubjectsAPIView(APIView):
             logger.debug(f"Filters: {filters}")
 
             # Fetch subjects from the user's class schedules
-            user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related(
-                'subject_semester__subject')
+            user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related('subject_semester__subject')
             user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
 
             logger.debug(f"User subjects: {[subject.title for subject in user_subjects]}")
 
             # Fetch study plans from other universities based on filters
-            other_study_plans = StudyPlan.objects.exclude(student__userprofile__university=user_university).filter(
-                **filters).distinct()
+            other_study_plans = StudyPlan.objects.exclude(student__university=user_university).filter(**filters).distinct()
 
             logger.debug(f"Other study plans count: {other_study_plans.count()}")
 
@@ -239,8 +237,7 @@ class SimilarSubjectsAPIView(APIView):
                             'description': other_subject.description,
                             'university': other_subject.university.name,
                             'faculty': other_subject.faculty.name if other_subject.faculty else None,
-                            'term': [f"{semester.term} {semester.year}" for semester in
-                                     other_subject.offered_semesters.all()],
+                            'term': [f"{semester.term} {semester.year}" for semester in other_subject.offered_semesters.all()],
                             'similarity': similarity
                         })
 
