@@ -10,6 +10,7 @@ from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
 import openpyxl
 from django.http import HttpResponse
+from io import BytesIO
 
 
 class AvailableSubjectSemestersAPIView(APIView):
@@ -209,6 +210,7 @@ class SimilarSubjectsAPIView(APIView):
         return Response(similar_subjects, status=status.HTTP_200_OK)
 
 
+
 class ExportStudyPlanToExcelAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -250,11 +252,13 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet[f'A{row}'] = 'Total Credits'
         sheet[f'B{row}'] = total_credits
 
-        # Set the response to download the file
-        response = HttpResponse(content=workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename=study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx'
+        # Save the workbook to a bytes buffer
+        buffer = BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
 
-        # Save the workbook to the response
-        workbook.save(response)
+        # Set the response to download the file
+        response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename=study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx'
 
         return response
