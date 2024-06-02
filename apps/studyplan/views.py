@@ -192,7 +192,7 @@ class SimilarSubjectsAPIView(APIView):
         for user_subject in user_subjects:
             for other_subject in other_university_subjects:
                 similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
-                if similarity >= 80:
+                if similarity >= 10:
                     similar_subjects.append({
                         'similar_subject': {
                             'title': other_subject.title,
