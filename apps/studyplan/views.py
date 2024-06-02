@@ -178,7 +178,7 @@ class ClassScheduleListCreateAPIView(APIView):
 class SimilarSubjectsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def post(self, request):
         user_profile = request.user.userprofile
         user_university = user_profile.university
 
@@ -190,7 +190,6 @@ class SimilarSubjectsAPIView(APIView):
         term = request.data.get('term')
         year = request.data.get('year')
 
-        # Filter subjects based on request data
         filters = {}
         if university_name:
             filters['university__name'] = university_name
