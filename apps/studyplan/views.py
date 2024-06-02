@@ -218,10 +218,11 @@ class ExportStudyPlanToExcelAPIView(APIView):
         student = get_object_or_404(UserProfile, user=request.user)
 
         # Fetch the latest semester or a default semester for the student
-        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term')
+        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term').first()
         if not study_plan:
             return Response({'error': 'No study plan found for the student'}, status=status.HTTP_404_NOT_FOUND)
 
+        subjects = study_plan.subjects.all()
         # Create a workbook and add a worksheet
         workbook = openpyxl.Workbook()
         sheet = workbook.active
@@ -240,9 +241,10 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet['B5'] = 'Credits'
 
         # Add subjects and calculate total credits
+
         row = 6
         total_credits = 0
-        for subject in study_plan.subjects.all():
+        for subject in subjects:
             sheet[f'A{row}'] = subject.title
             sheet[f'B{row}'] = subject.credits
             total_credits += subject.credits
