@@ -9,6 +9,7 @@ from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemes
 from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
 import openpyxl
+from django.http import HttpResponse
 
 
 class AvailableSubjectSemestersAPIView(APIView):
@@ -250,7 +251,7 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet[f'B{row}'] = total_credits
 
         # Set the response to download the file
-        response = Response(content=workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response = HttpResponse(content=workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename=study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx'
 
         # Save the workbook to the response
