@@ -14,13 +14,17 @@ class UniversityAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'faculty')
+    list_display = ('title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'get_faculty_and_university')
     list_filter = ('university', 'offered_semesters', 'faculty')
     search_fields = ('title', 'code')
 
     def get_offered_semesters(self, obj):
         return ", ".join([f"{semester.term} {semester.year}" for semester in obj.offered_semesters.all()])
     get_offered_semesters.short_description = 'Offered Semesters'
+
+    def get_faculty_and_university(self, obj):
+        return f"{obj.faculty} ({obj.university})"
+    get_faculty_and_university.short_description = 'Faculty (University)'
 
 
 class StudyPlanAdmin(admin.ModelAdmin):
