@@ -4,7 +4,6 @@ from apps.studyplan.views import(
     AvailableSubjectSemestersAPIView,
     ClassScheduleListCreateAPIView,
     SimilarSubjectsAPIView,
-    ExportStudyPlanToExcelAPIView
 )
 
 
@@ -14,6 +13,4 @@ urlpatterns = [
     path('class-schedules/', ClassScheduleListCreateAPIView.as_view(), name='class-schedules-list-create'),
     path('class-schedules/<int:pk>/', ClassScheduleListCreateAPIView.as_view(), name='class-schedules-delete'),
     path('similar-subjects/', SimilarSubjectsAPIView.as_view(), name='similar-subjects'),
-    path('export_study_plan/', ExportStudyPlanToExcelAPIView.as_view(), name='export_study_plan'),
-
 ]

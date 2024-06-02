@@ -1,16 +1,12 @@
 from datetime import time
 from django.db import transaction
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester, StudyPlan
+from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester
 from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
-import pandas as pd
-from django.http import FileResponse
-from io import BytesIO
 
 
 class AvailableSubjectSemestersAPIView(APIView):
@@ -224,49 +220,3 @@ class SimilarSubjectsAPIView(APIView):
                     })
 
         return Response(similar_subjects, status=status.HTTP_200_OK)
-
-
-class ExportStudyPlanToExcelAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        student = get_object_or_404(UserProfile, user=request.user)
-
-        # Fetch the latest semester or a default semester for the student
-        study_plan = StudyPlan.objects.filter(student=student).order_by('-semester__year', '-semester__term').first()
-        if not study_plan:
-            return Response({'error': 'No study plan found for the student'}, status=404)
-
-        subjects = study_plan.subjects.all()
-
-        # Create a DataFrame
-        data = {
-            'Subject Name': [subject.title for subject in subjects],
-            'Credits': [subject.credits for subject in subjects]
-        }
-        df = pd.DataFrame(data)
-        total_credits = df['Credits'].sum()
-
-        # Add total credits row
-        total_credits_row = pd.DataFrame([['Total Credits', total_credits]], columns=['Subject Name', 'Credits'])
-        df = pd.concat([df, total_credits_row], ignore_index=True)
-
-        # Add headers for student info
-        student_info = pd.DataFrame([
-            ['Student name:', student.user.username],
-            ['University name:', student.university.name],
-            ['Semester:', f"{study_plan.semester.term} {study_plan.semester.year}"]
-        ], columns=['Subject Name', 'Credits'])
-
-        df = pd.concat([student_info, pd.DataFrame([['', '']]), df], ignore_index=True)
-
-        # Save the DataFrame to a bytes buffer
-        buffer = BytesIO()
-        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Study Plan')
-
-        buffer.seek(0)
-
-        # Set the response to download the file
-        response = FileResponse(buffer, as_attachment=True, filename=f'study_plan_{student.user.username}_{study_plan.semester.term}_{study_plan.semester.year}.xlsx')
-        return response
