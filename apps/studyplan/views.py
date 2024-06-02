@@ -232,15 +232,23 @@ class SimilarSubjectsAPIView(APIView):
                 for other_subject in other_university_subjects:
                     similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
                     if similarity >= 1:
-                        similar_subjects.append({
-                            'title': other_subject.title,
-                            'description': other_subject.description,
-                            'university': other_subject.university.name,
-                            'faculty': other_subject.faculty.name if other_subject.faculty else None,
-                            'term': [f"{semester.term} {semester.year}" for semester in other_subject.offered_semesters.all()],
-                            'similarity': similarity
-                        })
-            if len(similar_subjects) < 1:
+                        subject_semester = other_subject.subjectsemester_set.filter(semester__term=term, semester__year=year).first()
+                        if subject_semester:
+                            similar_subjects.append({
+                                'title': other_subject.title,
+                                'description': other_subject.description,
+                                'university': other_subject.university.name,
+                                'faculty': other_subject.faculty.name if other_subject.faculty else None,
+                                'term': f"{term} {year}",
+                                'semester_id': subject_semester.semester.id,
+                                'subject_semester_id': subject_semester.id,
+                                'day_of_week': subject_semester.day_of_week,
+                                'start_time': subject_semester.start_time,
+                                'end_time': subject_semester.end_time,
+                                'similarity': similarity
+                            })
+
+            if not similar_subjects:
                 similar_subjects = "no subjects"
 
             return Response(similar_subjects, status=status.HTTP_200_OK)
