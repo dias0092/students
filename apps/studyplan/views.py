@@ -198,7 +198,7 @@ class SimilarSubjectsAPIView(APIView):
             # Prepare filters for the study plans
             filters = {}
             if university_name:
-                filters['student__university__name'] = university_name
+                filters['subjects__university__name'] = university_name
             if faculty_name:
                 filters['subjects__faculty__name'] = faculty_name
             if term:
