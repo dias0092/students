@@ -228,7 +228,7 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet['A1'] = 'Student name:'
         sheet['B1'] = student.user.username
         sheet['A2'] = 'University name:'
-        sheet['B2'] = study_plan.semester.university.name
+        sheet['B2'] = student.university.name
         sheet['A3'] = 'Semester:'
         sheet['B3'] = f"{study_plan.semester.term} {study_plan.semester.year}"
 
