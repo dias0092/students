@@ -1,3 +1,4 @@
+import logging
 from datetime import time
 from django.db import transaction
 from rest_framework.permissions import IsAuthenticated
@@ -179,52 +180,72 @@ class SimilarSubjectsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user_profile = request.user.userprofile
-        user_university = user_profile.university
+        logger = logging.getLogger(__name__)
 
-        if not user_university:
-            return Response({'error': 'User is not associated with any university'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user_profile = request.user.userprofile
+            user_university = user_profile.university
 
-        university_name = request.data.get('university')
-        faculty_name = request.data.get('faculty')
-        term = request.data.get('term')
-        year = request.data.get('year')
+            if not user_university:
+                logger.error("User is not associated with any university")
+                return Response({'error': 'User is not associated with any university'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        filters = {}
-        if university_name:
-            filters['subjects__university__name'] = university_name
-        if faculty_name:
-            filters['subjects__faculty__name'] = faculty_name
-        if term:
-            filters['subjects__offered_semesters__term'] = term
-        if year:
-            filters['subjects__offered_semesters__year'] = year
+            university_name = request.data.get('university')
+            faculty_name = request.data.get('faculty')
+            term = request.data.get('term')
+            year = request.data.get('year')
 
-        # Fetch subjects from the user's class schedules
-        user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related('subject_semester__subject')
-        user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
+            filters = {}
+            if university_name:
+                filters['subjects__university__name'] = university_name
+            if faculty_name:
+                filters['subjects__faculty__name'] = faculty_name
+            if term:
+                filters['subjects__offered_semesters__term'] = term
+            if year:
+                filters['subjects__offered_semesters__year'] = year
 
-        # Fetch study plans from other universities based on filters
-        other_study_plans = StudyPlan.objects.exclude(student__userprofile__university=user_university).filter(**filters).distinct()
+            logger.debug(f"Filters: {filters}")
 
-        # Extract unique subjects from the filtered study plans
-        other_university_subjects = set()
-        for plan in other_study_plans:
-            other_university_subjects.update(plan.subjects.all())
+            # Fetch subjects from the user's class schedules
+            user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related(
+                'subject_semester__subject')
+            user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
 
-        similar_subjects = []
+            logger.debug(f"User subjects: {[subject.title for subject in user_subjects]}")
 
-        for user_subject in user_subjects:
-            for other_subject in other_university_subjects:
-                similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
-                if similarity >= 10:
-                    similar_subjects.append({
-                        'title': other_subject.title,
-                        'description': other_subject.description,
-                        'university': other_subject.university.name,
-                        'faculty': other_subject.faculty.name if other_subject.faculty else None,
-                        'term': [f"{semester.term} {semester.year}" for semester in other_subject.offered_semesters.all()],
-                        'similarity': similarity
-                    })
+            # Fetch study plans from other universities based on filters
+            other_study_plans = StudyPlan.objects.exclude(student__userprofile__university=user_university).filter(
+                **filters).distinct()
 
-        return Response(similar_subjects, status=status.HTTP_200_OK)
+            logger.debug(f"Other study plans count: {other_study_plans.count()}")
+
+            # Extract unique subjects from the filtered study plans
+            other_university_subjects = set()
+            for plan in other_study_plans:
+                other_university_subjects.update(plan.subjects.all())
+
+            logger.debug(f"Other university subjects: {[subject.title for subject in other_university_subjects]}")
+
+            similar_subjects = []
+
+            for user_subject in user_subjects:
+                for other_subject in other_university_subjects:
+                    similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
+                    if similarity >= 10:
+                        similar_subjects.append({
+                            'title': other_subject.title,
+                            'description': other_subject.description,
+                            'university': other_subject.university.name,
+                            'faculty': other_subject.faculty.name if other_subject.faculty else None,
+                            'term': [f"{semester.term} {semester.year}" for semester in
+                                     other_subject.offered_semesters.all()],
+                            'similarity': similarity
+                        })
+
+            return Response(similar_subjects, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Error occurred: {e}", exc_info=True)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
