@@ -240,6 +240,7 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet['B5'] = 'Credits'
 
         # Add subjects and calculate total credits
+        print(study_plan.subjects.all())
         row = 6
         total_credits = 0
         for subject in study_plan.subjects.all():
