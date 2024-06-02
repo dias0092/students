@@ -231,7 +231,7 @@ class SimilarSubjectsAPIView(APIView):
             for user_subject in user_subjects:
                 for other_subject in other_university_subjects:
                     similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
-                    if similarity >= 10:
+                    if similarity >= 1:
                         similar_subjects.append({
                             'title': other_subject.title,
                             'description': other_subject.description,
@@ -240,6 +240,8 @@ class SimilarSubjectsAPIView(APIView):
                             'term': [f"{semester.term} {semester.year}" for semester in other_subject.offered_semesters.all()],
                             'similarity': similarity
                         })
+            if len(similar_subjects) < 1:
+                similar_subjects = "no subjects"
 
             return Response(similar_subjects, status=status.HTTP_200_OK)
 
