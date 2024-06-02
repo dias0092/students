@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.forms import forms
+from django import forms
 
 from apps.studyplan.models import Semester, University, Subject, StudyPlan, ClassSchedule, SubjectSemester, Faculty
 from apps.studyplan.form import SubjectSemesterForm
