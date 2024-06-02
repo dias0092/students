@@ -44,9 +44,13 @@ class SubjectAdmin(admin.ModelAdmin):
 
 
 class StudyPlanAdmin(admin.ModelAdmin):
-    list_display = ('student', 'semester', 'total_credits', 'subject')
+    list_display = ('student', 'semester', 'total_credits', 'get_subject_names')
     list_filter = ('semester',)
     search_fields = ('student__user__username',)
+
+    def get_subject_names(self, obj):
+        return ", ".join([subject.title for subject in obj.subjects.all()])
+    get_subject_names.short_description = 'Subjects'
 
 
 class ClassScheduleAdmin(admin.ModelAdmin):
