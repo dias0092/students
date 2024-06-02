@@ -174,7 +174,6 @@ class ClassScheduleListCreateAPIView(APIView):
             return Response({'error': 'Class schedule not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 class SimilarSubjectsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -195,11 +194,6 @@ class SimilarSubjectsAPIView(APIView):
                 similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
                 if similarity >= 80:
                     similar_subjects.append({
-                        'user_subject': {
-                            'title': user_subject.title,
-                            'description': user_subject.description,
-                            'university': user_subject.university.name
-                        },
                         'similar_subject': {
                             'title': other_subject.title,
                             'description': other_subject.description,
