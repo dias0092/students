@@ -245,6 +245,7 @@ class SimilarSubjectsAPIView(APIView):
                                 'day_of_week': subject_semester.day_of_week,
                                 'start_time': subject_semester.start_time,
                                 'end_time': subject_semester.end_time,
+                                'credits': other_subject.credits,
                                 'similarity': similarity
                             })
 
