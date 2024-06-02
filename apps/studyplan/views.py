@@ -189,8 +189,24 @@ class SimilarSubjectsAPIView(APIView):
         if not user_university:
             return Response({'error': 'User is not associated with any university'}, status=status.HTTP_400_BAD_REQUEST)
 
+        university_name = request.data.get('university')
+        faculty_name = request.data.get('faculty')
+        term = request.data.get('term')
+        year = request.data.get('year')
+
+        # Filter subjects based on request data
+        filters = {}
+        if university_name:
+            filters['university__name'] = university_name
+        if faculty_name:
+            filters['faculty__name'] = faculty_name
+        if term:
+            filters['offered_semesters__term'] = term
+        if year:
+            filters['offered_semesters__year'] = year
+
         user_subjects = Subject.objects.filter(university=user_university)
-        other_university_subjects = Subject.objects.exclude(university=user_university)
+        other_university_subjects = Subject.objects.exclude(university=user_university).filter(**filters).distinct()
 
         similar_subjects = []
 
@@ -199,16 +215,15 @@ class SimilarSubjectsAPIView(APIView):
                 similarity = fuzz.token_set_ratio(user_subject.description, other_subject.description)
                 if similarity >= 10:
                     similar_subjects.append({
-                        'similar_subject': {
-                            'title': other_subject.title,
-                            'description': other_subject.description,
-                            'university': other_subject.university.name,
-                            'similarity': similarity
-                        }
+                        'title': other_subject.title,
+                        'description': other_subject.description,
+                        'university': other_subject.university.name,
+                        'faculty': other_subject.faculty.name if other_subject.faculty else None,
+                        'term': [f"{semester.term} {semester.year}" for semester in other_subject.offered_semesters.all()],
+                        'similarity': similarity
                     })
 
         return Response(similar_subjects, status=status.HTTP_200_OK)
-
 
 
 class ExportStudyPlanToExcelAPIView(APIView):
@@ -241,7 +256,6 @@ class ExportStudyPlanToExcelAPIView(APIView):
         sheet['B5'] = 'Credits'
 
         # Add subjects and calculate total credits
-
         row = 6
         total_credits = 0
         for subject in subjects:
@@ -253,6 +267,7 @@ class ExportStudyPlanToExcelAPIView(APIView):
         # Add total credits
         sheet[f'A{row}'] = 'Total Credits'
         sheet[f'B{row}'] = total_credits
+
         # Save the workbook to a bytes buffer
         buffer = BytesIO()
         workbook.save(buffer)
