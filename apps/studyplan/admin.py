@@ -9,12 +9,14 @@ class FacultyModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.name} ({obj.university.name})"
 
+
 class SubjectAdminForm(forms.ModelForm):
     faculty = FacultyModelChoiceField(queryset=Faculty.objects.all())
 
     class Meta:
         model = Subject
         fields = '__all__'
+
 
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ('year', 'term', 'credit_limit')
@@ -42,7 +44,7 @@ class SubjectAdmin(admin.ModelAdmin):
 
 
 class StudyPlanAdmin(admin.ModelAdmin):
-    list_display = ('student', 'semester', 'total_credits')
+    list_display = ('student', 'semester', 'total_credits', 'subject')
     list_filter = ('semester',)
     search_fields = ('student__user__username',)
 

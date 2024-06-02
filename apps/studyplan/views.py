@@ -251,7 +251,6 @@ class ExportStudyPlanToExcelAPIView(APIView):
         # Add total credits
         sheet[f'A{row}'] = 'Total Credits'
         sheet[f'B{row}'] = total_credits
-
         # Save the workbook to a bytes buffer
         buffer = BytesIO()
         workbook.save(buffer)
