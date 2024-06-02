@@ -127,9 +127,8 @@ USE_TZ = True
 AVATAR_URL = '/avatars/'
 AVATAR_ROOT = os.path.join(BASE_DIR, 'avatars')
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = AVATAR_URL
-STATIC_ROOT = AVATAR_ROOT
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (Uploaded files)
 MEDIA_URL = AVATAR_URL
