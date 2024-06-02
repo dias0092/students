@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester
+from apps.studyplan.models import Subject, Semester, ClassSchedule, SubjectSemester, StudyPlan
 from apps.authorization.models import UserProfile
 from fuzzywuzzy import fuzz
 
@@ -196,12 +196,18 @@ class SimilarSubjectsAPIView(APIView):
         if faculty_name:
             filters['faculty__name'] = faculty_name
         if term:
-            filters['offered_semesters__term'] = term
+            filters['subjects__offered_semesters__term'] = term
         if year:
-            filters['offered_semesters__year'] = year
+            filters['subjects__offered_semesters__year'] = year
 
-        user_subjects = Subject.objects.filter(university=user_university)
-        other_university_subjects = Subject.objects.exclude(university=user_university).filter(**filters).distinct()
+        user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related('subject_semester__subject')
+        user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
+
+        other_study_plans = StudyPlan.objects.exclude(student__userprofile__university=user_university).filter(**filters).distinct()
+
+        other_university_subjects = set()
+        for plan in other_study_plans:
+            other_university_subjects.update(plan.subjects.all())
 
         similar_subjects = []
 
