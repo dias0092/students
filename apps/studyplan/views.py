@@ -193,8 +193,6 @@ class SimilarSubjectsAPIView(APIView):
         filters = {}
         if university_name:
             filters['university__name'] = university_name
-        if faculty_name:
-            filters['faculty__name'] = faculty_name
         if term:
             filters['offered_semesters__term'] = term
         if year:
