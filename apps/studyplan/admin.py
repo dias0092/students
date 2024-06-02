@@ -1,7 +1,20 @@
 from django.contrib import admin
+from django.forms import forms
+
 from apps.studyplan.models import Semester, University, Subject, StudyPlan, ClassSchedule, SubjectSemester, Faculty
 from apps.studyplan.form import SubjectSemesterForm
 
+
+class FacultyModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.name} ({obj.university.name})"
+
+class SubjectAdminForm(forms.ModelForm):
+    faculty = FacultyModelChoiceField(queryset=Faculty.objects.all())
+
+    class Meta:
+        model = Subject
+        fields = '__all__'
 
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ('year', 'term', 'credit_limit')
@@ -14,6 +27,7 @@ class UniversityAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
+    form = SubjectAdminForm
     list_display = ('title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'get_faculty_and_university')
     list_filter = ('university', 'offered_semesters', 'faculty')
     search_fields = ('title', 'code')
