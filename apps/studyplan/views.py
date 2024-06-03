@@ -196,7 +196,6 @@ class SimilarSubjectsAPIView(APIView):
             term = request.data.get('term')
             year = request.data.get('year')
 
-            # Prepare filters for the study plans
             filters = {}
             if university_name:
                 filters['subjects__university__name'] = university_name
@@ -209,18 +208,15 @@ class SimilarSubjectsAPIView(APIView):
 
             print(f"Filters: {filters}")
 
-            # Fetch subjects from the user's class schedules
             user_class_schedules = ClassSchedule.objects.filter(student=user_profile).select_related('subject_semester__subject')
             user_subjects = [schedule.subject_semester.subject for schedule in user_class_schedules]
 
             print(f"User subjects: {[subject.title for subject in user_subjects]}")
 
-            # Fetch study plans from other universities based on filters
             other_study_plans = StudyPlan.objects.filter(**filters).distinct()
 
             print(f"Other study plans count: {other_study_plans.count()}")
 
-            # Extract unique subjects from the filtered study plans
             other_university_subjects = set()
             for plan in other_study_plans:
                 other_university_subjects.update(plan.subjects.all())
