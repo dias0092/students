@@ -73,6 +73,7 @@ class ClassScheduleListCreateAPIView(APIView):
             'end_time',
             'subject_semester__subject__title',
             'subject_semester__subject__description',
+            'subject_semester__subject__credits',
             'subject_semester__subject__university__name',
             'subject_semester_id'
         )
