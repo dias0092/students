@@ -10,6 +10,20 @@ class FacultyModelChoiceField(forms.ModelChoiceField):
         return f"{obj.name} ({obj.university.name})"
 
 
+class StudyPlanForm(forms.ModelForm):
+    class Meta:
+        model = StudyPlan
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['subjects'].queryset = Subject.objects.all()
+        self.fields['subjects'].help_text = "Select subjects (University - Subject Title)"
+
+        # Overriding the labels to include the university name
+        self.fields['subjects'].label_from_instance = lambda obj: f"{obj.university.name} - {obj.title}"
+
+
 class SubjectAdminForm(forms.ModelForm):
     faculty = FacultyModelChoiceField(queryset=Faculty.objects.all())
 
@@ -44,13 +58,14 @@ class SubjectAdmin(admin.ModelAdmin):
 
 
 class StudyPlanAdmin(admin.ModelAdmin):
+    form = StudyPlanForm
     list_display = ('student', 'semester', 'total_credits', 'get_subject_names')
     list_filter = ('semester',)
     search_fields = ('student__user__username',)
 
     def get_subject_names(self, obj):
-        return ", ".join([subject.title for subject in obj.subjects.all()])
-    get_subject_names.short_description = 'Subjects'
+        return ", ".join([f"{subject.university.name} - {subject.title}" for subject in obj.subjects.all()])
+    get_subject_names.short_description = 'Subjects (University)'
 
 
 class ClassScheduleAdmin(admin.ModelAdmin):
