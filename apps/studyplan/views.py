@@ -249,6 +249,13 @@ class SimilarSubjectsAPIView(APIView):
                                 'credits': other_subject.credits,
                                 'similarity': similarity
                             })
+            unique_subjects = {}
+            for subject in similar_subjects:
+                title = subject['title']
+                if title not in unique_subjects or subject['similarity'] > unique_subjects[title]['similarity']:
+                    unique_subjects[title] = subject
+
+            similar_subjects = list(unique_subjects.values())
 
             if not similar_subjects:
                 similar_subjects = "no subjects"
