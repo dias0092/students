@@ -50,6 +50,7 @@ class SubjectListAPIView(APIView):
                 'credits': subject.credits,
                 'description': subject.description,
                 'code': subject.code,
+                'capacity': subject.capacity,
                 'university_name': subject.university.name,
                 'faculty_name': subject.faculty.name,
                 'offered_terms': offered_terms_list
