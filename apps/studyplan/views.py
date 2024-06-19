@@ -43,7 +43,7 @@ class SubjectListAPIView(APIView):
 
         for subject in subjects:
             class_schedules_count = ClassSchedule.objects.filter(subject_semester__subject=subject).count()
-            remaining_capacity = subject.capacity - class_schedules_count
+            enrollment_ratio = f"{class_schedules_count}/{subject.capacity}"
             offered_terms = subject.offered_semesters.all().values_list('term', 'year')
             offered_terms_list = [f"{term} {year}" for term, year in offered_terms]
             subject_data = {
@@ -52,7 +52,7 @@ class SubjectListAPIView(APIView):
                 'credits': subject.credits,
                 'description': subject.description,
                 'code': subject.code,
-                'capacity': remaining_capacity,
+                'capacity': enrollment_ratio,
                 'university_name': subject.university.name,
                 'faculty_name': subject.faculty.name,
                 'offered_terms': offered_terms_list
