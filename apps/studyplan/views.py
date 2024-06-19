@@ -153,6 +153,8 @@ class ClassScheduleListCreateAPIView(APIView):
                         'semester_term': semester.term,
                         'semester_year': semester.year
                     })
+                    subject_semester.subject.capacity -= 1
+                    subject_semester.subject.save()
 
                 return Response({'success': 'Classes added to schedule successfully', 'schedules': added_schedules},
                                 status=status.HTTP_201_CREATED)
