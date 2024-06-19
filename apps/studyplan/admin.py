@@ -44,7 +44,7 @@ class UniversityAdmin(admin.ModelAdmin):
 
 class SubjectAdmin(admin.ModelAdmin):
     form = SubjectAdminForm
-    list_display = ('title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'get_faculty_and_university')
+    list_display = ('id', 'title', 'description', 'code', 'credits', 'university', 'get_offered_semesters', 'get_faculty_and_university')
     list_filter = ('university', 'offered_semesters', 'faculty')
     search_fields = ('title', 'code')
 
