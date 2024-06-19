@@ -42,6 +42,8 @@ class SubjectListAPIView(APIView):
         subject_list = []
 
         for subject in subjects:
+            class_schedules_count = ClassSchedule.objects.filter(subject_semester__subject=subject).count()
+            remaining_capacity = subject.capacity - class_schedules_count
             offered_terms = subject.offered_semesters.all().values_list('term', 'year')
             offered_terms_list = [f"{term} {year}" for term, year in offered_terms]
             subject_data = {
@@ -50,7 +52,7 @@ class SubjectListAPIView(APIView):
                 'credits': subject.credits,
                 'description': subject.description,
                 'code': subject.code,
-                'capacity': subject.capacity,
+                'capacity': remaining_capacity,
                 'university_name': subject.university.name,
                 'faculty_name': subject.faculty.name,
                 'offered_terms': offered_terms_list
@@ -262,16 +264,3 @@ class SimilarSubjectsAPIView(APIView):
         except Exception as e:
             logger.error(f"Error occurred: {e}", exc_info=True)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class SubjectCapacityAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, subject_id):
-        try:
-            subject = Subject.objects.get(id=subject_id)
-            class_schedules_count = ClassSchedule.objects.filter(subject_semester__subject=subject).count()
-            remaining_capacity = subject.capacity - class_schedules_count
-            return Response({'subject_id': subject.id, 'title': subject.title, 'capacity': remaining_capacity}, status=status.HTTP_200_OK)
-        except Subject.DoesNotExist:
-            return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
