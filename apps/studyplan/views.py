@@ -153,8 +153,6 @@ class ClassScheduleListCreateAPIView(APIView):
                         'semester_term': semester.term,
                         'semester_year': semester.year
                     })
-                    subject_semester.subject.capacity -= 1
-                    subject_semester.subject.save()
 
                 return Response({'success': 'Classes added to schedule successfully', 'schedules': added_schedules},
                                 status=status.HTTP_201_CREATED)
@@ -272,6 +270,8 @@ class SubjectCapacityAPIView(APIView):
     def get(self, request, subject_id):
         try:
             subject = Subject.objects.get(id=subject_id)
-            return Response({'subject_id': subject.id, 'title': subject.title, 'capacity': subject.capacity}, status=status.HTTP_200_OK)
+            class_schedules_count = ClassSchedule.objects.filter(subject_semester__subject=subject).count()
+            remaining_capacity = subject.capacity - class_schedules_count
+            return Response({'subject_id': subject.id, 'title': subject.title, 'capacity': remaining_capacity}, status=status.HTTP_200_OK)
         except Subject.DoesNotExist:
             return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
