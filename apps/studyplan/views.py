@@ -262,3 +262,14 @@ class SimilarSubjectsAPIView(APIView):
         except Exception as e:
             logger.error(f"Error occurred: {e}", exc_info=True)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SubjectCapacityAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, subject_id):
+        try:
+            subject = Subject.objects.get(id=subject_id)
+            return Response({'subject_id': subject.id, 'title': subject.title, 'capacity': subject.capacity}, status=status.HTTP_200_OK)
+        except Subject.DoesNotExist:
+            return Response({'error': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)

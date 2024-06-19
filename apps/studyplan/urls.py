@@ -4,6 +4,7 @@ from apps.studyplan.views import(
     AvailableSubjectSemestersAPIView,
     ClassScheduleListCreateAPIView,
     SimilarSubjectsAPIView,
+    SubjectCapacityAPIView
 )
 
 
@@ -13,4 +14,6 @@ urlpatterns = [
     path('class-schedules/', ClassScheduleListCreateAPIView.as_view(), name='class-schedules-list-create'),
     path('class-schedules/<int:pk>/', ClassScheduleListCreateAPIView.as_view(), name='class-schedules-delete'),
     path('similar-subjects/', SimilarSubjectsAPIView.as_view(), name='similar-subjects'),
+    path('subjects/<int:subject_id>/capacity/', SubjectCapacityAPIView.as_view(), name='subject-capacity'),
+
 ]
